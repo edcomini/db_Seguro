@@ -217,8 +217,9 @@ ON V.Cpf_Segurado = P.Cpf_Segurado
 INNER JOIN Seguradora AS S
 ON V.Cnpj_Seguradora = S.Cnpj_seguradora; 
 
--- Quero o renavam do carro, telefone da seguradora e telefone da seguradora do veículo
--- na cidade de São Paulo
+-- Quero o renavam do carro, telefone da seguradora localizada
+--na cidade de são paulo e telefone da seguradora do veículo
+
 SELECT Renavam,Telefone_Seguradora, Telefone AS Telefone_do_Proprietário FROM Veiculo AS V
 INNER JOIN Proprietario AS P
 ON V.Cpf_Segurado = P.Cpf_Segurado
