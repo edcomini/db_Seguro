@@ -121,19 +121,27 @@ SELECT * FROM Seguradora;
 SELECT * FROM Veiculo;
 SELECT Cor FROM Veiculo;
 SELECT Marca_Modelo, Cor FROM Veiculo;
+
+-- SELECT com Alias
 SELECT Marca_Modelo AS Modelo, Cor As Cores_Dos_Veiculos FROM Veiculo;
+
+--SELECT com ORDER BY
 SELECT Marca_Modelo, Cor FROM Veiculo ORDER BY Marca_Modelo;
 SELECT Marca_Modelo, Cor FROM Veiculo ORDER BY Marca_Modelo DESC;
 SELECT DISTINCT Marca_Modelo FROM Veiculo; 
 
 --Selecionando Marca_Modelo que comecem com a letra "c".
 SELECT Marca_Modelo FROM Veiculo WHERE Marca_Modelo LIKE 'c%';
+
 --Selecionando Marca_Modelo que terminam com a letra "a".
 SELECT Marca_Modelo FROM Veiculo WHERE Marca_Modelo LIKE '%a';
+
 --Começa com a letra "c" e Termina com a letra "a".
 SELECT Marca_Modelo FROM Veiculo WHERE Marca_Modelo LIKE 'c%' AND Marca_Modelo LIKE '%a';
+
 --Marca_Modelo e Cor começam com as letras "c" e "v", respectivamente.
 SELECT Marca_Modelo, Cor FROM Veiculo WHERE Marca_Modelo LIKE 'c%' AND Cor LIKE 'v%'; 
+
 --selecionando o Renavam que possui o terceiro dígito = 3
 SELECT Renavam FROM Veiculo WHERE Renavam LIKE '__3%';
 
@@ -196,9 +204,27 @@ SELECT Marca_Modelo AS Modelo, Nome AS Proprietário, Idade FROM Veiculo AS V
 INNER JOIN Proprietario AS P
 ON V.Cpf_Segurado = P.Cpf_Segurado;
 
+--Refinando a busca INNER JOIN com WHERE
+SELECT Marca_Modelo AS Modelo, Nome AS Proprietário, Idade FROM Veiculo AS V
+INNER JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE Nome LIKE 'j%';
+
 -- Quero saber os nome dos proprietários, Modelos dos carro, valores dos carros e valores dos seguros. 
-SELECT Nome AS Proprietário, Marca_Modelo AS Modelo, Valor_Veiculo, Valor_Seguro AS Custo_do_Seguro FROM Veiculo AS V
+SELECT Nome AS Proprietário, Marca_Modelo AS Modelo, Valor_Veiculo, Valor_Seguro FROM Veiculo AS V
 INNER JOIN Proprietario AS P
 ON V.Cpf_Segurado = P.Cpf_Segurado
 INNER JOIN Seguradora AS S
 ON V.Cnpj_Seguradora = S.Cnpj_seguradora; 
+
+-- Quero o renavam do carro, telefone da seguradora e telefone da seguradora do veículo
+-- na cidade de São Paulo
+SELECT Renavam,Telefone_Seguradora, Telefone AS Telefone_do_Proprietário FROM Veiculo AS V
+INNER JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+INNER JOIN Seguradora AS S
+ON V.Cnpj_Seguradora = S.Cnpj_Seguradora
+WHERE Telefone_Seguradora LIKE '11%';
+
+
+
