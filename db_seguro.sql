@@ -4,7 +4,10 @@ CREATE DATABASE db_Seguro;
 --Escolhendo o banco de dados criado
 USE db_Seguro;
 
+--*******************
 -- Criando as tabelas
+--*******************
+
 CREATE TABLE Veiculo (
 Renavam varchar(11) PRIMARY KEY,
 Cor VARCHAR(20) NOT NULL,
@@ -27,6 +30,14 @@ Endereco_Seguradora VARCHAR(50) NOT NULL,
 Telefone_Seguradora VARCHAR(15) NOT NULL UNIQUE,
 Valo_Seguro REAL NOT NULL
 )
+
+--**************************************
+--Alguns comandos ALTER TABLE
+--Criando e excluindo chave estrangeiras
+--**************************************
+
+ALTER TABLE Proprietario
+ADD Cidade VARCHAR(50) NULL;
 
 -- Excluindo Algumas colunas
 ALTER TABLE Veiculo 
@@ -59,6 +70,7 @@ GO
 ALTER TABLE Veiculo
 DROP CONSTRAINT fk_Seguradora;
 GO
+
 -- Criando foreign key numa coluna existente na tabela veiculo
 ALTER TABLE Veiculo
 ADD CONSTRAINT fk_Proprietario FOREIGN KEY(Cpf_Segurado)
@@ -72,7 +84,9 @@ REFERENCES Seguradora;
 
 sp_rename 'Seguradora.Valo_Seguro','Valor_Seguro','COLUMN';
 
--- INSERINDO DADOS NAS TABELAS
+--*********************
+-- POPULANDO AS TABELAS
+--*********************
 
 INSERT INTO Proprietario(Cpf_Segurado, Nome, Idade, Endereco, Telefone)
 VALUES('2346782393', 'João', 30, 'Rua das variações musicais, n10', '11928375362'),
@@ -114,10 +128,18 @@ INSERT INTO Seguradora(Cnpj_Seguradora, Endereco_Seguradora, Telefone_Seguradora
 			('66738855122', 'Estrada da Baronesa, n200', '1158968756', 1000),
 			('77985231779', 'Estrada de Itapecerica, n3784', '1159029834', 1050);
 
-SELECT * FROM Seguradora;
+			SELECT * FROM Proprietario
+-- Populando uma coluna com condições 
+-- Se o DDD for 11, cidade será São Paulo
 
--- SELECIONANDO COLUNAS ESPECÍFICA DA TABELA VEÍCULO APLICANDO ALGUNS COMANDOS
+INSERT INTO Proprietario(Cidade) VALUES ('São Paulo')
+    Telefone IN (SELECT Telefone FROM Proprietario 
+WHERE Telefone LIKE '11%');
 
+--***********************
+-- Alguns Comandos SELECT
+--***********************
+SELECT * FROM Proprietario;
 SELECT * FROM Veiculo;
 SELECT Cor FROM Veiculo;
 SELECT Marca_Modelo, Cor FROM Veiculo;
@@ -187,9 +209,35 @@ SELECT COUNT(*) FROM Veiculo;
 SELECT COUNT(Cor) FROM Veiculo
 WHERE Cor LIKE 'v%';
 
+--******************************
+-- Alguns comandos UPDATE
+--******************************
+SELECT * FROM Veiculo;
+-- Acrescentar aumento de 10% sobre todos os valores dos carros
+UPDATE Veiculo
+SET Valor_Veiculo = Valor_Veiculo * 1.1;
 
+SELECT * FROM Seguradora;
+--Diminuir 5% sobre todos os valores dos seguros
+UPDATE Seguradora
+SET Valor_Seguro = Valor_Seguro * 0.95;
+
+--Atualizar o endereço da seguradora que tem o cnpj 54728763983
+UPDATE Seguradora
+SET Endereco_Seguradora = 'Av Grande, n1000'
+WHERE Cnpj_Seguradora = 54728763983;
+
+-- Aumentar os valores dos seguros em 15% das seguradoras que cobram menos do que R$ 1.000,00
+UPDATE Seguradora
+SET Valor_Seguro = Valor_Seguro*1.15
+WHERE Valor_Seguro < 1000;
+
+
+
+
+--*********************************************************
 --Select USANDO INNER JOIN. Intersecção entre duas tabelas.
-
+--*********************************************************
 SELECT * FROM Veiculo 
 INNER JOIN Proprietario
 ON Veiculo.Cpf_Segurado = Proprietario.Cpf_Segurado;
@@ -227,5 +275,6 @@ INNER JOIN Seguradora AS S
 ON V.Cnpj_Seguradora = S.Cnpj_Seguradora
 WHERE Telefone_Seguradora LIKE '11%';
 
+--Aumentar os valores dos seguros de todos os proprietários que moram em são paulo
 
 
