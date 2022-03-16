@@ -31,6 +31,11 @@ Telefone_Seguradora VARCHAR(15) NOT NULL UNIQUE,
 Valo_Seguro REAL NOT NULL
 )
 
+DROP TABLE Proprietario;
+
+DROP TABLE Seguradora;
+
+DROP TABLE Veiculo;
 --**************************************
 --Alguns comandos ALTER TABLE
 --Criando e excluindo chave estrangeiras
@@ -46,14 +51,16 @@ DROP COLUMN Cpf_Segurado;
 ALTER TABLE Veiculo
 DROP COLUMN Cnpj_Seguradora;
 
+SELECT * FROM Veiculo;
+
 -- Adicionando coluna e estabelecendo os relacionamentos
 ALTER TABLE Veiculo
-ADD Cpf_Segurado VARCHAR(12) NOT NULL
+ADD Cpf_Segurado VARCHAR(12) NULL
 CONSTRAINT fk_Proprietario FOREIGN KEY(Cpf_Segurado)
 REFERENCES Proprietario;
 
 ALTER TABLE Veiculo 
-ADD Cnpj_Seguradora VARCHAR(11) NOT NULL
+ADD Cnpj_Seguradora VARCHAR(11) NULL
 CONSTRAINT fk_Seguradora FOREIGN KEY (Cnpj_Seguradora)
 REFERENCES Seguradora;
 
@@ -66,6 +73,8 @@ GO
 ALTER TABLE Veiculo
 DROP CONSTRAINT fk_Proprietario;
 GO
+
+
 GO
 ALTER TABLE Veiculo
 DROP CONSTRAINT fk_Seguradora;
@@ -116,6 +125,8 @@ INSERT INTO Veiculo(Renavam, Cor, Valor_Veiculo, Cpf_Segurado, Cnpj_Seguradora, 
 
 		SELECT * FROM Veiculo;
 
+		
+
 INSERT INTO Seguradora(Cnpj_Seguradora, Endereco_Seguradora, Telefone_Seguradora, Valor_Seguro)
 	VALUES('36749715284', 'Av dos Estados, n4338', '1149837452', 1200),
 			('54728763983', 'Rua Praia Grande, n44', '1937281733', 1250),
@@ -128,13 +139,27 @@ INSERT INTO Seguradora(Cnpj_Seguradora, Endereco_Seguradora, Telefone_Seguradora
 			('66738855122', 'Estrada da Baronesa, n200', '1158968756', 1000),
 			('77985231779', 'Estrada de Itapecerica, n3784', '1159029834', 1050);
 
-			SELECT * FROM Proprietario
+			SELECT * FROM Seguradora;
+
+			
+
 -- Populando uma coluna com condições 
 -- Se o DDD for 11, cidade será São Paulo
 
-INSERT INTO Proprietario(Cidade) VALUES ('São Paulo')
-    Telefone IN (SELECT Telefone FROM Proprietario 
-WHERE Telefone LIKE '11%');
+UPDATE Proprietario
+SET Cidade  = 'São Paulo'
+WHERE Telefone LIKE '11%'
+
+-- Se o DDD for 21, cidade será Rio de Janeiro
+UPDATE Proprietario
+SET Cidade = 'Rio de Janeiro'
+WHERE Telefone LIKE '21%';
+
+-- Se o DDD for 13, cidade será Bertioga
+UPDATE Proprietario
+SET Cidade = 'Bertioga'
+WHERE Telefone LIKE '13%';
+
 
 --***********************
 -- Alguns Comandos SELECT
@@ -209,6 +234,21 @@ SELECT COUNT(*) FROM Veiculo;
 SELECT COUNT(Cor) FROM Veiculo
 WHERE Cor LIKE 'v%';
 
+--****************
+--SELECT TOP
+--****************
+--Selecionando o valor de quatro seguros que tem o custo mais alto.
+SELECT TOP(4) Valor_Seguro FROM Seguradora
+ORDER BY Valor_Seguro DESC; 
+
+--***************
+-- WITH TIES
+--***************
+-- Se houver um registro com mesmo valor do último, o comando WITH TIES mostra. 
+
+SELECT TOP(4) WITH TIES Valor_Seguro FROM Seguradora
+ORDER BY Valor_Seguro DESC;
+
 --******************************
 -- Alguns comandos UPDATE
 --******************************
@@ -276,5 +316,205 @@ ON V.Cnpj_Seguradora = S.Cnpj_Seguradora
 WHERE Telefone_Seguradora LIKE '11%';
 
 --Aumentar os valores dos seguros de todos os proprietários que moram em são paulo
+
+UPDATE Seguradora
+SET Valor_Seguro = S.Valor_Seguro * 1.1
+FROM Seguradora AS S
+INNER JOIN Veiculo AS V
+ON V.Cnpj_Seguradora = S.Cnpj_Seguradora
+INNER JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE Cidade = 'São Paulo';
+
+--************************
+--Select USANDO LEFT JOIN. 
+--************************
+
+SELECT * FROM Veiculo AS V
+LEFT JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado;
+
+
+SELECT V.Renavam,  V.Marca_Modelo, P.Cpf_Segurado, P.Nome FROM Veiculo AS V
+LEFT JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado;
+
+
+INSERT INTO Proprietario(Cpf_Segurado, Nome, Idade, Endereco, Telefone, Cidade) 
+VALUES('11111111111', 'Edson', 38, 'Rua Hafiz Abi Chedid, n 20', '11999999999', 'São Paulo');
+
+ALTER TABLE Veiculo
+DROP CONSTRAINT fk_Proprietario;
+
+ALTER TABLE Veiculo
+DROP CONSTRAINT fk_Seguradora;
+
+INSERT INTO Veiculo(Renavam, Cor, Valor_Veiculo, Cpf_Segurado, Cnpj_Seguradora, Marca_Modelo)
+VALUES('123456789', 'BRANCO', 40000, null , '1234567', 'FORD');
+
+SELECT * FROM Proprietario;
+SELECT * FROM Veiculo; 
+--************************************************
+--LEFT JOIN EXCLUINDO CORRESPONDÊNCIAS 
+--************************************************
+-- Retorna Somente dados da tabela veículo que não tem correspondência com a tabela proprietário.
+
+SELECT * FROM Veiculo AS V
+LEFT JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE P.Cpf_Segurado IS NULL;
+
+
+SELECT V.Renavam, V.Marca_Modelo, P.Cpf_Segurado, P.Nome FROM Veiculo AS V
+LEFT JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE P.Cpf_Segurado IS NULL; 
+
+--**********
+--RIGHT JOIN
+--**********
+SELECT * FROM Proprietario AS P
+RIGHT JOIN Veiculo AS V
+ON V.Cpf_Segurado = P.Cpf_Segurado;
+
+--************************************
+--RIGHT JOIN Excluindo correspondência
+--************************************
+SELECT * FROM Proprietario AS P
+RIGHT JOIN Veiculo AS V
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE V.Cpf_Segurado IS NULL;
+
+--*********
+--FULL JOIN
+--Retorna todos os dados das tabelas, dados com e sem correspondências.
+--*********
+SELECT * FROM Veiculo AS V
+FULL JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado;
+
+--************************************
+--FULL JOIN excluindo correspondências
+--Dados que não possuem correspondências entre as tabelas
+--************************************
+
+SELECT * FROM Veiculo AS V
+FULL JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+WHERE V.Cpf_Segurado IS NULL
+OR P.Cpf_Segurado IS NULL;
+
+
+--********************
+--Operador IN e NOT IN
+--********************
+--Aplica um filtro na busca pelo os dados
+
+SELECT * FROM Proprietario
+WHERE Idade IN (30 , 40);
+
+
+SELECT * FROM Veiculo;
+
+--**********************************************
+--Inserindo um campo calculado na tabela veículo
+--**********************************************
+--Inserindo uma coluna chamada IPVA
+
+ALTER TABLE Veiculo
+ADD IPVA AS (0.04 * Valor_Veiculo);
+
+
+--Criando regras
+--**********************************
+-- CREATE RULE
+--**********************************
+
+SELECT * FROM Seguradora;
+-- Criar uma regra na qual o valor do seguro não pode ser menor que 
+--R$1.000,00 e maior que R$2.000,00 reais.
+
+CREATE RULE regra_valor_seguro AS @valor >= 1000 AND @Valor <= 2000;
+
+--Agora vou vincular a regra à coluna do valor do seguro.
+EXECUTE sp_bindrule regra_valor_seguro, 'Seguradora.Valor_Seguro'; 
+
+-- Testando se a regra funcionou
+UPDATE Seguradora
+SET Valor_Seguro = 900
+WHERE Cnpj_Seguradora = '11192937465';
+
+--Criando uma regra para o número de dígitos do CPF.
+--O CPF tem exatamente 11 dígitos. A regra impõe essa condição.
+
+CREATE RULE regra_cpf_segurado AS @digitos LIKE '___________'; 
+
+EXECUTE sp_bindrule regra_cpf_segurado, 'Proprietario.Cpf_Segurado';
+
+UPDATE Proprietario
+SET Cpf_Segurado = '12345677777'
+WHERE Cpf_Segurado = '2346782393';
+
+SELECT * FROM Proprietario; 
+SELECT * FROM Seguradora;
+SELECT * FROM Veiculo;
+
+--**********
+--VIEWS
+--**********
+-- Vou criar uma VIEW que mostra o renavam e modelo 
+-- do veículo, junto com o nome e endereço do proprietário. 
+
+CREATE VIEW view_veiculo_proprietario
+AS SELECT V.Renavam, V.Marca_Modelo, P.Nome, P.Endereco
+FROM Veiculo AS V
+INNER JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado;
+
+SELECT * FROM view_veiculo_proprietario;
+
+--SELECT Sobre o VIEW
+SELECT * FROM view_veiculo_proprietario
+WHERE Nome LIKE 'J%';
+
+--Criando um VIEW usando INNER JOIN agora com as três tabelas.
+CREATE VIEW view_veiculo_proprietario_Seguradora
+AS SELECT V.Renavam, V.Marca_Modelo, P.Nome, P.Endereco, S.Cnpj_Seguradora AS CNPJ, S.Valor_Seguro
+FROM Veiculo AS V
+INNER JOIN Proprietario AS P
+ON V.Cpf_Segurado = P.Cpf_Segurado
+INNER JOIN Seguradora AS S
+ON V.Cnpj_Seguradora = S.Cnpj_Seguradora;
+
+
+SELECT * FROM view_veiculo_proprietario_Seguradora;
+
+-- DELETANDO UMA VIEW
+
+DROP VIEW view_veiculo_proprietario;
+
+
+--Atualizando todos os campos de uma coluna com base em valores de duas tabelas.
+
+(UPDATE Seguradora 
+SET Valor_Seguro  = (0.04 * Valor_Veiculo)
+FROM Veiculo
+INNER JOIN Seguradora
+ON Veiculo.Cnpj_Seguradora = Seguradora.Cnpj_Seguradora) AS tab_atualizada
+
+
+-- Como há pessoas que possuem mais de um veículo, então, quero saber
+-- o total de imposto que cada pessoa irá pagar.
+
+SELECT Resultado.Nome_do_Proprietario, SUM(Valor_do_Seguro) AS Total_de_Imposto
+FROM
+(SELECT P.Nome AS Nome_do_Proprietario, V.Marca_Modelo AS Carro, S.Valor_Seguro AS Valor_do_Seguro
+FROM Proprietario AS P
+INNER JOIN Veiculo AS V
+ON V.Cpf_Segurado = P.Cpf_Segurado
+INNER JOIN Seguradora AS S
+ON V.Cnpj_Seguradora = S.Cnpj_Seguradora) AS Resultado
+GROUP BY Resultado.Nome_do_Proprietario
+ORDER BY Total_de_Imposto DESC; 
 
 
